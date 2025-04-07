@@ -2,7 +2,14 @@
 <html lang="en">
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, orientation=landscape">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="license" content="This work is licensed under the MIT License.">
+    <link rel="license" href="https://opensource.org/licenses/MIT">
+    <meta name="author" content="khurshid@utexas.edu">
+    <title>A simple scorer for the sport (but not the vegetable) squash</title>
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta name="last-updated" content="2025-04-07">
 </head>
 
 <!-- Google tag (gtag.js) -->
@@ -15,6 +22,763 @@
     gtag('config', 'G-NCNJGQDJR5');
 </script>
 
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        padding: 0px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        overflow-y: scroll;
+    }
+
+    .container {
+        margin: 10px;
+        width: 100%;
+        max-width: 600px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    input,
+    button {
+        display: block;
+        margin: 10px auto;
+        padding: 10px;
+        font-size: 18px;
+        border: none;
+        border-radius: 5px;
+    }
+
+    input {
+        width: 80%;
+        background: rgba(255, 255, 255, 0.8);
+        color: #333;
+    }
+
+    button {
+        background: #51054f;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background: #ff4f91;
+    }
+
+    .toggle-button {
+        width: 80%;
+        background: #ccc;
+        color: black;
+    }
+
+    .toggle-button.active {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .backButton {
+        position: fixed;
+        top: 0px;
+        left: 10px;
+        padding: 5px 5px;
+        font-size: 14px;
+        background: #51054f;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        width: auto;
+        white-space: nowrap;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        column-gap: 15px;
+        margin: 0 auto;
+        padding: 10px;
+        width: fit-content;
+        max-width: 800px;
+        position: relative;
+    }
+
+    .gridCellContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .square {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        font-weight: bold;
+        position: relative;
+    }
+
+    #gamesp1,
+    #gamesp2 {
+        height: 120px;
+        width: 110px;
+        color: #C586C0;
+        font-size: 150px;
+        background: #1F1F1F;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        user-select: none;
+    }
+
+    #pointsp1,
+    #pointsp2 {
+        height: 225px;
+        width: 250px;
+        color: #DCDCAA;
+        font-size: 220px;
+        background: #1F1F1F;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        user-select: none;
+    }
+
+    #gamescores {
+        color: #C586C0;
+        font-size: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        font-size: 15px;
+        color: white;
+    }
+
+    .inc-region,
+    .dec-region {
+        position: absolute;
+        width: 100%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .inc-region {
+        height: 80%;
+        top: 0;
+    }
+
+    .dec-region {
+        height: 20%;
+        bottom: 0;
+    }
+
+    .inc-region::before {
+        font-size: 40px;
+        color: #4EC9B0;
+        content: '+';
+        position: absolute;
+        left: 5%;
+        top: 5%;
+    }
+
+    .dec-region::before {
+        font-size: 40px;
+        color: #CE9178;
+        content: '-';
+        position: absolute;
+        left: 5%;
+    }
+
+    .timer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+        color: #1F1F1F;
+        padding: 5px;
+        width: 80%;
+        margin: 0 auto;
+    }
+
+    .playername {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        border: none;
+        padding: 5px;
+        border-radius: 5px;
+        width: 80%;
+        margin: 0 auto;
+        cursor: pointer;
+    }
+
+    .underline {
+        text-decoration: underline;
+        text-decoration-thickness: 10px;
+        text-decoration-color: #DCDCAA;
+    }
+
+    .side {
+        position: absolute;
+        top: 70px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #DCDCAA;
+        color: #1F1F1F;
+        padding: 5px 5px;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .table-container {
+        margin-bottom: auto;
+    }
+
+    table {
+        margin: 5px;
+        text-align: center;
+        width: auto;
+        border-collapse: collapse;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    th,
+    td {
+        padding: 1px 5px;
+        color: white;
+        font-size: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    th {
+        background: rgba(255, 255, 255, 0.2);
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    tr:first-child th {
+        border-top: none;
+    }
+
+    .logcontainer {
+        position: relative;
+        max-width: 600px;
+        padding: 5px;
+    }
+
+    textarea {
+        overflow-y: auto;
+        width: 90%;
+        height: 200px;
+        font-size: 12px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        color: #4EC9B0;
+        background-color: #1F1F1F;
+    }
+
+    .logbuttons {
+        position: absolute;
+        bottom: 10px;
+        right: 40px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .logbuttons button {
+        background: #569CD6;
+        opacity: 70%;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease, opacity 0.3s ease;
+    }
+
+    .logbuttons button:hover {
+        background: rgba(0, 123, 255, 0.8);
+    }
+
+    .logbuttons button i {
+        font-size: 18px;
+        opacity: 0.7;
+    }
+
+    .notification {
+        position: absolute;
+        top: 100px;
+        right: 40px;
+        background: #C586C0;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .notification.show {
+        opacity: 1;
+    }
+</style>
+
 <body>
-  <h1>Hello Squash World!</h1>
+    <div style="font-size: x-small; color: #1F1F1F; text-align: right; width: 95%;">
+        A simple scorer for the sport (but not the vegetable) squash
+    </div>
+    <div class="container" id="enterplayersandreferee">
+        <h2>Who's playing and refereeing?</h2>
+        <div>
+            <label style="display: inline;">Player 1</label>
+            <input type="text" id="nameP1" style="display: inline;" placeholder="Boasts A. Lot">
+        </div>
+        <div>
+            <label style="display: inline;">Player 2</label>
+            <input type="text" id="nameP2" style="display: inline;" placeholder="Loves D. Tin">
+        </div>
+        <div>
+            <label style="display: inline;">Referee</label>
+            <input type="text" id="nameRef" style="display: inline;" placeholder="Knows O. Rules">
+        </div>
+        <button onclick="doneNames()">Next</button>
+    </div>
+
+    <div class="container hidden" id="entertoss">
+        <h2>Who won the toss?</h2>
+        <button class="toggle-button" id="tossP1" onclick="toss(1)">Boasts A. Lot</button>
+        <button class="toggle-button" id="tossP2" onclick="toss(2)">Loves D. Tin</button>
+        <button id="play-button" onclick="doneToss()">Play!</button>
+        <button class="backButton" id="backbutton1" title="Back" onclick="back1()"><i
+                class="material-icons">arrow_back</i></button>
+    </div>
+
+    <div class="hidden" id="entermatch">
+        <div class="grid">
+            <div class="timer" id="timer">00:00:00</div>
+            <div></div>
+            <div></div>
+            <div></div>
+
+            <div class="gridCellContainer">
+                <div class="square" id="gamesp1">0</div>
+            </div>
+
+            <div class="gridCellContainer">
+                <div class="playername" id="nameP1disp" title="Switch server" onclick="swapServer()">Player 1</div>
+                <div class="square" id="pointsp1">00
+                    <div class="inc-region" title="Plus 1 point" onclick="addPoint('pointsp1')"></div>
+                    <div class="dec-region" title="Minus 1 point" onclick="subPoint('pointsp1')"></div>
+                </div>
+            </div>
+
+            <div class="gridCellContainer">
+                <div class="playername" id="nameP2disp" title="Switch server" onclick="swapServer()">Player 2</div>
+                <div class="square" id="pointsp2">00
+                    <div class="inc-region" title="Plus 1 point" onclick="addPoint('pointsp2')"></div>
+                    <div class="dec-region" title="Minus 1 point" onclick="subPoint('pointsp2')"></div>
+                </div>
+            </div>
+            <div class="side" id="side" title="Switch side" onclick="swapSide()">Right</div>
+
+            <div class="gridCellContainer">
+                <div class="square" id="gamesp2">0</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="cell-p1">P1</th>
+                                <th id="cell-p2">P2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="cell-g1-p1">-</td>
+                                <td id="cell-g1-p2">-</td>
+                            </tr>
+                            <tr>
+                                <td id="cell-g2-p1">-</td>
+                                <td id="cell-g2-p2">-</td>
+                            </tr>
+                            <tr>
+                                <td id="cell-g3-p1">-</td>
+                                <td id="cell-g3-p2">-</td>
+                            </tr>
+                            <tr>
+                                <td id="cell-g4-p1">-</td>
+                                <td id="cell-g4-p2">-</td>
+                            </tr>
+                            <tr>
+                                <td id="cell-g5-p1">-</td>
+                                <td id="cell-g5-p2">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button class="backButton" id="backbutton2" title="Back" onclick="back2()"><i
+                    class="material-icons">arrow_back</i></button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="logarea">
+        <div class=" logcontainer">
+            <div class="logbuttons">
+                <button id="copybutton" title="Copy Log to Clipboard"><i
+                        class="material-icons">content_copy</i></button>
+                <button id="savebutton" title="Save Log to File"><i class="material-icons">save</i></button>
+                <button id="emailbutton" title="Email Log"><i class="material-icons">email</i></button>
+            </div>
+            <textarea id="log" readonly></textarea>
+            <div id="notification" class="notification">Notification</div>
+        </div>
+    </div>
+
+    <!-- License -->
+    <footer style="color: #1F1F1F; font-size: x-small;">
+        This work is licensed under the
+        <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">
+            MIT License
+        </a>.
+    </footer>
+
+    <script>
+        if (history.scrollRestoration) {
+            history.scrollRestoration = 'manual';
+        }
+
+        const logDiv = document.getElementById('log');
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            // Hide after 2 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy text to clipboard
+        document.getElementById('copybutton').addEventListener('click', () => {
+            const textbox = document.getElementById('log');
+            textbox.select();
+            document.execCommand('copy');
+            textbox.setSelectionRange(0, 0);
+            showNotification('Copied!');
+        });
+
+        // Save text to a file
+        document.getElementById('savebutton').addEventListener('click', () => {
+            const text = document.getElementById('log').value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = 'textfile.txt';
+            downloadLink.click();
+
+            URL.revokeObjectURL(url);
+            showNotification('File saved!');
+        });
+
+        // Email text
+        document.getElementById('emailbutton').addEventListener('click', () => {
+            const text = encodeURIComponent(document.getElementById('log').value);
+            const subject = encodeURIComponent('Squash match log');
+            const mailtoLink = `mailto:?subject=${subject}&body=${text}`;
+            window.location.href = mailtoLink;
+            showNotification('Email started!');
+        });
+
+        writeToLog('Match progress log generated by\nA simple scorer for the sport (but not the vegetable) squash\nhttps://trickleboast.github.io');
+
+        function writeToLog(logEntry) {
+            logDiv.innerHTML += `${logEntry}\n\n`;
+            logDiv.scrollTop = logDiv.scrollHeight; // Auto-scroll to the bottom
+        }
+
+        let bestof = 5; // match is best-of-5-games
+
+        let p1name;
+        let p2name;
+        let refereename;
+
+        let tossWinner;
+
+        let matchStarted = false;
+        let gameCount = 0;
+
+        let timer;
+        let startTime;
+
+        document.getElementById('entermatch').classList.remove('grid');
+        document.getElementById('entermatch').classList.add('hidden');
+
+        function initials(fullname) {
+            const names = fullname.split(" ");
+            return names.map(name => name.charAt(0)).join("");
+        }
+
+        function swapServer() {
+            document.getElementById('nameP1disp').classList.toggle("underline");
+            document.getElementById('nameP2disp').classList.toggle("underline");
+
+            // set default side when handout
+            document.getElementById("side").textContent = "Right";
+        }
+
+        function swapSide() {
+            const side = document.getElementById("side");
+            side.textContent = (side.textContent === "Right") ? "Left" : "Right";
+        }
+
+        function gameOver() {
+            // assume: 11 points PAR scoring; win by 2 points
+            const p1 = parseInt(document.getElementById('pointsp1').textContent, 10);
+            const p2 = parseInt(document.getElementById('pointsp2').textContent, 10);
+            const max = (p1 > p2) ? p1 : p2;
+            const min = (p1 < p2) ? p1 : p2;
+            if (max >= 11 && max - min >= 2) {
+                return true;
+            }
+            return false;
+        }
+
+        function matchOver() { // assume: bestof is odd
+            const p1 = parseInt(document.getElementById('gamesp1').textContent, 10);
+            const p2 = parseInt(document.getElementById('gamesp2').textContent, 10);
+            const half = bestof / 2;
+            return (p1 > half || p2 > half);
+        }
+
+        function addPoint(id) { // assume: game in progress
+            let lastServer = document.getElementById('nameP1disp').classList.contains("underline") ? 1 : 2;
+            let pointWinner = (id === 'pointsp1') ? 1 : 2;
+            let side = document.getElementById('side').textContent;
+
+            let elem = document.getElementById(id);
+            let value = parseInt(elem.innerText, 10);
+            value = value + 1;
+
+            writeToLog(`[${new Date().toLocaleString()}] P1 = ${parseInt(document.getElementById('pointsp1').textContent)}, P2 = ${parseInt(document.getElementById('pointsp2').textContent)}, Server = P${lastServer}, Side = ${side}, Winner = P${pointWinner} (${value})`);
+
+            elem.childNodes[0].nodeValue = value.toString().padStart(2, '0');
+
+            if (!gameOver()) {
+                if (lastServer === pointWinner) {
+                    swapSide();
+                } else {
+                    swapServer();
+                }
+                return;
+            }
+
+            // game over
+
+            gameCount++;
+
+            const p1score = parseInt(document.getElementById('pointsp1').childNodes[0].nodeValue);
+            const p2score = parseInt(document.getElementById('pointsp2').childNodes[0].nodeValue);
+            document.getElementById(`cell-g${gameCount}-p1`).textContent = p1score;
+            document.getElementById(`cell-g${gameCount}-p2`).textContent = p2score;
+
+            writeToLog(`[${new Date().toLocaleString()}] GAME ${gameCount} ENDED: P${pointWinner} won ${value} - ${(pointWinner === 1) ? p2score : p1score}`);
+
+            // reset points to 0-0
+            value = 0;
+            document.getElementById('pointsp1').childNodes[0].nodeValue = value.toString().padStart(2, '0');
+            document.getElementById('pointsp2').childNodes[0].nodeValue = value.toString().padStart(2, '0');
+
+            // update games won
+            if (id === 'pointsp1') {
+                gamesWon = parseInt(document.getElementById('gamesp1').textContent, 10);
+                document.getElementById('gamesp1').textContent = gamesWon + 1;
+            } else {
+                gamesWon = parseInt(document.getElementById('gamesp2').textContent, 10);
+                document.getElementById('gamesp2').textContent = gamesWon + 1;
+            }
+
+            if (!matchOver()) {
+                return;
+            }
+
+            // match over
+
+            stopTimer();
+
+            // Disable buttons
+            const incdecButtons = document.querySelectorAll(".inc-region, .dec-region, .side, .playername");
+            incdecButtons.forEach((button) => {
+                button.classList.add("disabled");
+            });
+
+            const p1games = document.getElementById('gamesp1').textContent;
+            const p2games = document.getElementById('gamesp2').textContent;
+
+            const winnergames = (p1games > p2games) ? p1games : p2games;
+            const losergames = (p1games < p2games) ? p1games : p2games;
+
+            writeToLog(`[${new Date().toLocaleString()}] MATCH ENDED: P${pointWinner} won ${winnergames} - ${losergames}`);
+        }
+
+        function subPoint(id) {
+            let elem = document.getElementById(id);
+            let value = parseInt(elem.innerText, 10);
+            if (value === 0) {
+                return;
+            }
+            value = value - 1;
+            elem.childNodes[0].nodeValue = value.toString().padStart(2, '0');
+
+            writeToLog(`[${new Date().toLocaleString()}] 1 POINT REDUCED FOR P${(id == 'pointsp1') ? '1' : '2'}`);
+        }
+
+        function doneNames() {
+            p1name = document.getElementById('nameP1').value;
+            if (p1name === '') {
+                p1name = 'Boasts A. Lot';
+            }
+
+            p2name = document.getElementById('nameP2').value;
+            if (p2name === '') {
+                p2name = 'Loves D. Tin';
+            }
+
+            refereename = document.getElementById('nameRef').value;
+            if (refereename === '') {
+                refereename = 'Knows O. Rules';
+            }
+
+            document.getElementById('tossP1').innerText = p1name;
+            document.getElementById('tossP2').innerText = p2name;
+
+            document.getElementById('tossP1').classList.remove('active');
+            document.getElementById('tossP2').classList.remove('active');
+
+            document.getElementById('enterplayersandreferee').classList.add('hidden');
+            document.getElementById('entertoss').classList.remove('hidden');
+            document.getElementById('entermatch').classList.remove('grid');
+            document.getElementById('entermatch').classList.add('hidden');
+
+            document.getElementById('play-button').classList.add("disabled");
+
+            writeToLog(`[${new Date().toLocaleString()}] Player 1 (P1): ${p1name}`);
+            writeToLog(`[${new Date().toLocaleString()}] Player 2 (P2): ${p2name}`);
+            writeToLog(`[${new Date().toLocaleString()}] Referee: ${refereename}`);
+        }
+
+        function doneToss() {
+            if (!matchStarted) {
+                matchStarted = true;
+                startTimer();
+                let element = document.getElementById((tossWinner === 1) ? 'nameP1disp' : 'nameP2disp');
+                element.classList.toggle("underline");
+            }
+
+            document.getElementById('nameP1disp').textContent = `${p1name}`;
+            document.getElementById('nameP2disp').textContent = `${p2name}`;
+            document.getElementById('cell-p1').textContent = initials(p1name);
+            document.getElementById('cell-p2').textContent = initials(p2name);
+
+            document.getElementById('enterplayersandreferee').classList.add('hidden');
+            document.getElementById('entertoss').classList.add('hidden');
+            document.getElementById('entermatch').classList.remove('hidden');
+            document.getElementById('entermatch').classList.add('grid');
+            document.getElementById('logarea').classList.remove('hidden');
+
+            writeToLog(`[${new Date().toLocaleString()}] Toss won by: P${tossWinner}`);
+        }
+
+        function toss(playerNumber) {
+            let b1 = document.getElementById('tossP1');
+            let b2 = document.getElementById('tossP2');
+
+            if (playerNumber === 1) {
+                tossWinner = 1;
+                b1.classList.add('active');
+                b2.classList.remove('active');
+            } else {
+                tossWinner = 2;
+                b2.classList.add('active');
+                b1.classList.remove('active');
+            }
+            document.getElementById('play-button').classList.remove("disabled");
+        }
+
+        function back1() {
+            document.getElementById('enterplayersandreferee').classList.remove('hidden');
+            document.getElementById('entertoss').classList.add('hidden');
+            document.getElementById('entermatch').classList.remove('grid');
+            document.getElementById('entermatch').classList.add('hidden');
+            document.getElementById('logarea').classList.add('hidden');
+        }
+
+        function back2() {
+            document.getElementById('enterplayersandreferee').classList.add('hidden');
+            document.getElementById('entertoss').classList.remove('hidden');
+            document.getElementById('entermatch').classList.remove('grid');
+            document.getElementById('entermatch').classList.add('hidden');
+            document.getElementById('logarea').classList.add('hidden');
+        }
+
+        function startTimer() {
+            // Store the start time
+            startTime = Date.now();
+
+            // Start the timer
+            timer = setInterval(updateClock, 1000);
+        }
+
+        function updateClock() {
+            const currentTime = Date.now();
+            const elapsedTime = Math.floor((currentTime - startTime) / 1000); // Elapsed time in seconds
+
+            // Calculate hours, minutes, and seconds
+            const hours = Math.floor(elapsedTime / 3600);
+            const minutes = Math.floor((elapsedTime % 3600) / 60);
+            const seconds = elapsedTime % 60;
+
+            // Format the time as HH:MM:SS
+            const timeString = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+            document.querySelector(".timer").textContent = timeString;
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+        }
+    </script>
 </body>
+
+</html>
