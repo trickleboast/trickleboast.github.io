@@ -43,7 +43,7 @@
     .container {
         margin: 10px;
         width: 100%;
-        max-width: 600px;
+        max-width: 400px;
         background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -620,6 +620,9 @@
             value = 0;
             document.getElementById('pointsp1').childNodes[0].nodeValue = value.toString().padStart(2, '0');
             document.getElementById('pointsp2').childNodes[0].nodeValue = value.toString().padStart(2, '0');
+
+            // reset serve side to default "Right"
+            document.getElementById("side").textContent = "Right";
 
             // update games won
             if (id === 'pointsp1') {
